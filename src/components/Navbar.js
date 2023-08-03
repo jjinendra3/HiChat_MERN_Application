@@ -33,6 +33,9 @@ const Navbar = () => {
               </li>
             </ul>
           </div>
+          <Link className="nav-link active" to="/login">
+                  Login/Signup
+                </Link>
         </div>
       </nav>
     </>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {Link} from 'react-router-dom'
 function Login() {
   document.body.style.backgroundColor = "#91C8E4";
   const [login, setlogin] = useState({
@@ -82,7 +83,7 @@ function Login() {
             style={{ display: "flex", justifyContent: "center", marginTop: 20 }}
           >
             <p>
-              Not a User? <a href="#signer">SignUp</a> Now!
+              Not a User? <Link to="/signup">SignUp</Link> Now!
             </p>
           </div>
         </form>

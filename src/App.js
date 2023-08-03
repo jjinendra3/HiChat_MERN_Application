@@ -1,9 +1,10 @@
 import React from "react";
 import Login from "./components/Login";
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route} from "react-router-dom";
 import ChatList from "./components/ChatList";
 import Navbar from "./components/Navbar";
 import About from "./components/About";
+import SignUp from "./components/SignUp";
 function App() {
   return (
     <BrowserRouter>
@@ -12,6 +13,7 @@ function App() {
         <Route exact path="/" element={<ChatList />} />
         <Route exact path="/login" element={<Login />} />
         <Route exact path="/about" element={<About />} />
+        <Route exact path="/signup" element={<SignUp />} />
       </Routes>
     </BrowserRouter>
   );
