@@ -5,6 +5,7 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const uniqueness = require("./middleware/uniquecheck");
 const url = require("./FireBaseURL");
+const CheckUser = require("./middleware/CheckUser");
 app.use(cors());
 app.use(express.json());
 app.post("/signup", uniqueness, (req, res) => {
@@ -29,6 +30,7 @@ app.post("/signup", uniqueness, (req, res) => {
 app.post("/login", (req, res) => {
   const { id, pw } = req.body;
   let num = parseInt(id);
+  let name;
   axios
     .get(url + "users.json")
     .then((resolve) => {
@@ -45,6 +47,7 @@ app.post("/login", (req, res) => {
         ) {
           if (resolve.data[key].password === pw) {
             obj = key;
+            name = resolve.data[key].name;
             break;
           }
         }
@@ -52,21 +55,27 @@ app.post("/login", (req, res) => {
       if (obj === "") {
         res.status(402).send("Credentials do not match!");
       } else {
-        console.log("Bomma");
-        let privateKey = "Jinendra";
+        let privateKey = "YOUR_PRIVATE_KEY";
         jwt.sign(obj, privateKey, function (err, token) {
-          res.send({ s: true, token });
+          res.send({ s: true, token, name });
         });
       }
       return;
     })
     .catch((err) => {
+      console.log(err);
       res.status(401).send({ s: false, err: err });
       return;
     });
   return;
 });
-
+app.get("/chatlist", CheckUser, async (req, res) => {
+  if (!req.checker) {
+    return res.send("Invalid JWT Token");
+  }
+  const response = await axios.get(url + "users.json");
+  return res.send(response.data[req.user_id]);
+});
 app.listen(5000, () => {
   console.log("HiChat");
 });

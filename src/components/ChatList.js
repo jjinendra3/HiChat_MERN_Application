@@ -1,8 +1,23 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import icon from "../icon.png";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import ContextApi from "../ContextApi";
 function ChatList() {
-  let arr = ["John", "Joshua", "Satish"];
+  const [arr, setarr] = useState([]);
+  const context = useContext(ContextApi);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!context.jwt_token) {
+      navigate("/login");
+    } else {
+      context.GetUser().then(() => {
+        console.log(context.user_details.friends);
+
+        setarr([...context.user_details.friends]);
+      });
+    }
+  }, []);
 
   document.body.style.backgroundColor = "#91C8E4";
   return (
