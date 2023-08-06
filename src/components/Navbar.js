@@ -27,6 +27,15 @@ const Navbar = () => {
                 </Link>
               </li>
               <li className="nav-item">
+                <Link
+                  className="nav-link active"
+                  aria-current="page"
+                  to="/addfriends"
+                >
+                  Add Friends
+                </Link>
+              </li>
+              <li className="nav-item">
                 <Link className="nav-link active" to="/about">
                   About
                 </Link>
@@ -34,8 +43,8 @@ const Navbar = () => {
             </ul>
           </div>
           <Link className="nav-link active" to="/login">
-                  Login/Signup
-                </Link>
+            Login/Signup
+          </Link>
         </div>
       </nav>
     </>

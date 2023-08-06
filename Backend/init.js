@@ -30,11 +30,10 @@ app.post("/signup", uniqueness, (req, res) => {
 app.post("/login", (req, res) => {
   const { id, pw } = req.body;
   let num = parseInt(id);
-  let name;
   axios
     .get(url + "users.json")
     .then((resolve) => {
-      let obj = "";
+      let obj = {};
       let check = 0;
       if (isNaN(num)) {
         check = 1;
@@ -46,35 +45,54 @@ app.post("/login", (req, res) => {
             : resolve.data[key].email === id
         ) {
           if (resolve.data[key].password === pw) {
-            obj = key;
-            name = resolve.data[key].name;
+            obj = {
+              key: key,
+              name: resolve.data[key].name,
+              email: resolve.data[key].email,
+              phone: resolve.data[key].phone,
+              friends: resolve.data[key].friends,
+            };
             break;
           }
         }
       }
-      if (obj === "") {
+      if (obj === {}) {
         res.status(402).send("Credentials do not match!");
       } else {
         let privateKey = "YOUR_PRIVATE_KEY";
         jwt.sign(obj, privateKey, function (err, token) {
-          res.send({ s: true, token, name });
+          res.send({ s: true, token, obj });
         });
       }
       return;
     })
     .catch((err) => {
-      console.log(err);
       res.status(401).send({ s: false, err: err });
       return;
     });
   return;
 });
-app.get("/chatlist", CheckUser, async (req, res) => {
+app.get("/getfriends/:searcher", CheckUser, async (req, res) => {
   if (!req.checker) {
     return res.send("Invalid JWT Token");
   }
-  const response = await axios.get(url + "users.json");
-  return res.send(response.data[req.user_id]);
+  const { searcher } = req.params;
+  try {
+    const response = await axios.get(url + "users.json");
+    let obj = [];
+    for (key in response.data) {
+      if (
+        response.data[key].name === searcher ||
+        response.data[key].email === searcher ||
+        response.data[key].phone === searcher
+      ) {
+        obj.push({ name: response.data[key].name, id: key });
+      }
+    }
+    return res.send(obj);
+  } catch (error) {
+    return res.send(error);
+  }
 });
 app.listen(5000, () => {
   console.log("HiChat");

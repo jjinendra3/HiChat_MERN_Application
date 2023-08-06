@@ -1,21 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import icon from "../icon.png";
 import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
 import ContextApi from "../ContextApi";
 function ChatList() {
   const [arr, setarr] = useState([]);
   const context = useContext(ContextApi);
-  const navigate = useNavigate();
   useEffect(() => {
-    if (!context.jwt_token) {
-      navigate("/login");
-    } else {
-      context.GetUser().then(() => {
-        console.log(context.user_details.friends);
-
-        setarr([...context.user_details.friends]);
-      });
+    if (context.user_details) {
+      if (context.user_details.friends) {
+        setarr(context.user_details.friends.slice(1));
+      }
     }
   }, []);
 
@@ -55,9 +49,13 @@ function ChatList() {
                 </Link>
               );
             })
-          ) : (
+          ) : context.jwt_token ? (
             <p style={{ fontSize: 24, fontWeight: "bold" }}>
               Search people on HiChat to start a conversation.
+            </p>
+          ) : (
+            <p style={{ fontSize: 24, fontWeight: "bold" }}>
+              Please Login to use HiChat!
             </p>
           )}
         </div>

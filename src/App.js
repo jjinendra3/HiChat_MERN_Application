@@ -7,13 +7,15 @@ import About from "./components/About";
 import SignUp from "./components/SignUp";
 import ChatScreen from "./components/ChatScreen";
 import HiChatData from "./ContextData";
+import AddFriends from "./components/AddFriends";
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
       <HiChatData>
+      <Navbar />
         <Routes>
           <Route exact path="/" element={<ChatList />} />
+          <Route exact path="/addfriends" element={<AddFriends />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/about" element={<About />} />
           <Route exact path="/signup" element={<SignUp />} />

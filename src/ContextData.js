@@ -89,7 +89,8 @@ const HiChatData = ({ children }) => {
           pw: "",
         });
         setjwt_token(res.data.token);
-        alert(`Welcome to HiChat, ${res.data.name}`);
+        setuser_details(res.data.obj);
+        alert(`Welcome to HiChat, ${res.data.obj.name}`);
         navigate("/");
       })
       .catch((error) => {
@@ -106,7 +107,7 @@ const HiChatData = ({ children }) => {
   };
   return (
     <HiChat.Provider
-      value={{ jwt_token, Signup, Login, GetUser, user_details }}
+      value={{ jwt_token, Signup, Login, GetUser, user_details, setjwt_token }}
     >
       {children}
     </HiChat.Provider>
