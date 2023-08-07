@@ -6,13 +6,10 @@ function ChatList() {
   const [arr, setarr] = useState([]);
   const context = useContext(ContextApi);
   useEffect(() => {
-    if (context.user_details) {
-      if (context.user_details.friends) {
-        setarr(context.user_details.friends.slice(1));
-      }
+    if (context.totalfriends) {
+      setarr(context.totalfriends.slice(1));
     }
   }, []);
-
   document.body.style.backgroundColor = "#91C8E4";
   return (
     <div className="main">
@@ -42,7 +39,7 @@ function ChatList() {
                         />
                       </div>
                       <div className="info" style={{ fontWeight: "bold" }}>
-                        <p> {element} </p>
+                        <p> {element.name} </p>
                       </div>
                     </div>
                   </div>

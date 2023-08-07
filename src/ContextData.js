@@ -6,6 +6,7 @@ const HiChatData = ({ children }) => {
   const navigate = useNavigate();
   const [user_details, setuser_details] = useState();
   const [jwt_token, setjwt_token] = useState();
+  const [totalfriends, settotalfriends] = useState();
   function ValidateEmail(mail) {
     // eslint-disable-next-line
     if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)) {
@@ -90,6 +91,7 @@ const HiChatData = ({ children }) => {
         });
         setjwt_token(res.data.token);
         setuser_details(res.data.obj);
+        settotalfriends(res.data.obj.friends);
         alert(`Welcome to HiChat, ${res.data.obj.name}`);
         navigate("/");
       })
@@ -107,7 +109,16 @@ const HiChatData = ({ children }) => {
   };
   return (
     <HiChat.Provider
-      value={{ jwt_token, Signup, Login, GetUser, user_details, setjwt_token }}
+      value={{
+        jwt_token,
+        Signup,
+        Login,
+        GetUser,
+        user_details,
+        setjwt_token,
+        totalfriends,
+        settotalfriends,
+      }}
     >
       {children}
     </HiChat.Provider>

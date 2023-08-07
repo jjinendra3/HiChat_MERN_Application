@@ -32,6 +32,31 @@ const AddFriends = () => {
         alert(err);
       });
   };
+  const adder = (key, name) => {
+    axios
+      .put(
+        `http://localhost:5000/addfriend/${key}`,
+        {},
+        {
+          headers: {
+            "auth-token": context.jwt_token,
+          },
+        }
+      )
+      .then(async (res) => {
+        alert(`${name} is succesfully added to your lists.`);
+        let arr = friendlist.filter((element) => {
+          return element.id !== key;
+        });
+        setfriendlist(arr);
+        arr = [...context.totalfriends];
+        arr.push({ name: name, id: key });
+        context.settotalfriends(arr);
+      })
+      .catch((err) => {
+        alert(err);
+      });
+  };
   return (
     <center>
       <div
@@ -102,7 +127,9 @@ const AddFriends = () => {
                     <div className="img"></div>
                     <div className="info" style={{ fontWeight: "bold" }}>
                       <p> {element.name} </p>
-                      <button>Add to friends</button>
+                      <button onClick={() => adder(element.id, element.name)}>
+                        Add to friends
+                      </button>
                     </div>
                   </div>
                 </div>
