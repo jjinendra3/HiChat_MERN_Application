@@ -19,7 +19,7 @@ function App() {
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/about" element={<About />} />
           <Route exact path="/signup" element={<SignUp />} />
-          <Route exact path="/chat" element={<ChatScreen />} />
+          <Route exact path="/chat/:conversation_id" element={<ChatScreen />} />
         </Routes>
       </HiChatData>
     </BrowserRouter>

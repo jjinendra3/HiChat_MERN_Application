@@ -95,6 +95,9 @@ app.put("/addfriend/:id", CheckUser, async (req, res) => {
     return res.send("Invalid JWT Token");
   }
   try {
+    if(req.params.id===req.user_id){
+      throw res.status(401).send("You cannot be your own friend!");
+    }
     const obj = await axios.get(url + `users/${req.user_id}.json`);
     const letobj = await axios.get(url + `users/${req.params.id}.json`);
     let letfriend = [...letobj.data.friends];
@@ -109,10 +112,14 @@ app.put("/addfriend/:id", CheckUser, async (req, res) => {
         throw res.status(403).send("You are already friends!");
       }
     }
-    friendss.push({ id: req.params.id, name: letobj.data.name });
-    letfriend.push({ id: req.user_id, name: obj.data.name });
+    let conversation_id;
+    axios.post(url+'conversations.json',{init:"init"}).then(async(resolve)=>{
+      conversation_id=resolve.data.name;
+      friendss.push({ id: req.params.id, name: letobj.data.name ,conversation_id:conversation_id});
+    letfriend.push({ id: req.user_id, name: obj.data.name ,conversation_id:conversation_id});
     obj.data.friends = friendss;
     letobj.data.friends = letfriend;
+    
     const response = await axios.put(
       url + `users/${req.user_id}.json`,
       obj.data
@@ -121,11 +128,53 @@ app.put("/addfriend/:id", CheckUser, async (req, res) => {
       url + `users/${req.params.id}.json`,
       letobj.data
     );
-    return res.send("Sucess!");
+    return res.send({s:"Sucess!",conversation_id});
+    }).catch((err)=>{
+      throw err;
+    })
   } catch (error) {
-    return error;
+    return res.send(error);
   }
 });
+app.post('/addchat/:convo_id',CheckUser,(req,res)=>{
+  if (!req.checker) {
+    return res.send("Invalid JWT Token");
+  }
+  const today=new Date();
+  let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  axios.post(url+`conversations/${req.params.convo_id}.json`,{
+    sender:req.user_id,
+    receiver:req.params.id,
+    text:req.body.text,
+    time:time
+  }).then((resolve)=>{
+    return  res.json({
+      sender:req.user_id,
+      receiver:req.params.id,
+      text:req.body.text,
+      time:time
+    });
+  }).catch((err)=>{
+    res.send(err);
+  })
+ 
+})
+app.get('/getchats/:con_id',CheckUser,async(req,res)=>{
+  if (!req.checker) {
+    return res.send("Invalid JWT Token");
+  }
+  try {
+    const response=await axios.get(url+ `conversations/${req.params.con_id}.json`);
+    let obj=[];
+    for(key in response.data){
+      if(key!=='init'){
+      obj.push(response.data[key])}
+    }
+    res.send({messages:obj,sender_id:req.user_id});
+  } catch (error) {
+    res.send(error);
+  }
+})
 app.listen(5000, () => {
   console.log("HiChat");
 });

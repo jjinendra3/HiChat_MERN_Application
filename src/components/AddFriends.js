@@ -50,7 +50,7 @@ const AddFriends = () => {
         });
         setfriendlist(arr);
         arr = [...context.totalfriends];
-        arr.push({ name: name, id: key });
+        arr.push({ name: name, id: key,conversation_id:res.data.conversation_id });
         context.settotalfriends(arr);
       })
       .catch((err) => {

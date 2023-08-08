@@ -1,12 +1,29 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect, useContext } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import ContextAPi from "../ContextApi";
 const ChatScreen = () => {
-  document.body.style.backgroundColor = "#91C8E4";
-
-  document.getElementsByClassName("chat");
+  const context = useContext(ContextAPi);
+  const { conversation_id } = useParams();
   const [msges, setmsges] = useState([]);
-  let header = "X";
-  let id = "Y";
+  const [header, setheader] = useState();
+  useEffect(() => {
+    axios
+      .get(`http://localhost:5000/getchats/${conversation_id.slice(1)}`, {
+        headers: {
+          "auth-token": context.jwt_token,
+        },
+      })
+      .then((res) => {
+        setheader(res.data.sender_id);
+        setmsges(res.data.messages);
+      })
+      .catch((err) => {
+        alert(err);
+      });
+  }, []);
+
+  document.body.style.backgroundColor = "#91C8E4";
   const [msgtext, setmsgtext] = useState("");
   return (
     <div>
@@ -50,7 +67,7 @@ const ChatScreen = () => {
                       alignItems: "center",
                     }}
                   >
-                    <p>{element.msg}</p>
+                    <p>{element.text}</p>
                   </div>
                 </div>
               );
@@ -94,24 +111,7 @@ const ChatScreen = () => {
               padding: 10,
               marginLeft: "1.2%",
             }}
-            onClick={() => {
-              let arr = [...msges];
-              var today = new Date();
-              var time =
-                today.getHours() +
-                ":" +
-                today.getMinutes() +
-                ":" +
-                today.getSeconds();
-              arr.push({
-                sender: header,
-                receiver: id,
-                msg: msgtext,
-                time: time,
-              });
-              setmsges(arr);
-              setmsgtext("");
-            }}
+            onClick={() => {}}
           >
             <i className="fa-solid fa-paper-plane"></i>
           </button>

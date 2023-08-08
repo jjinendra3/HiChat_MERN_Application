@@ -16,40 +16,42 @@ function ChatList() {
       <h1 style={{ textAlign: "center", marginTop: "3%" }}>🙋‍♂️HiChat💬</h1>
       <center style={{ marginTop: "5%" }}>
         <div className="list">
-          {arr.length !== 0 ? (
-            arr.map((element) => {
-              return (
-                <Link to="/chat">
-                  <div>
-                    <div
-                      className="list-item"
-                      style={{
-                        padding: 10,
-                        backgroundColor: "white",
-                        border: "1px solid black",
-                        margin: 10,
-                        width: "30%",
-                      }}
-                    >
-                      <div className="img">
-                        <img
-                          src={icon}
-                          style={{ height: 75, width: 75, marginBottom: 10 }}
-                          alt="Profile Pic"
-                        />
-                      </div>
-                      <div className="info" style={{ fontWeight: "bold" }}>
-                        <p> {element.name} </p>
+          {context.jwt_token ? (
+            arr.length !== 0 ? (
+              arr.map((element) => {
+                return (
+                  <Link to={`/chat/:${element.conversation_id}`}>
+                    <div>
+                      <div
+                        className="list-item"
+                        style={{
+                          padding: 10,
+                          backgroundColor: "white",
+                          border: "1px solid black",
+                          margin: 10,
+                          width: "30%",
+                        }}
+                      >
+                        <div className="img">
+                          <img
+                            src={icon}
+                            style={{ height: 75, width: 75, marginBottom: 10 }}
+                            alt="Profile Pic"
+                          />
+                        </div>
+                        <div className="info" style={{ fontWeight: "bold" }}>
+                          <p> {element.name} </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              );
-            })
-          ) : context.jwt_token ? (
-            <p style={{ fontSize: 24, fontWeight: "bold" }}>
-              Search people on HiChat to start a conversation.
-            </p>
+                  </Link>
+                );
+              })
+            ) : (
+              <p style={{ fontSize: 24, fontWeight: "bold" }}>
+                Search people on HiChat to start a conversation.
+              </p>
+            )
           ) : (
             <p style={{ fontSize: 24, fontWeight: "bold" }}>
               Please Login to use HiChat!
