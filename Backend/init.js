@@ -140,20 +140,8 @@ app.post('/addchat/:convo_id',CheckUser,(req,res)=>{
   if (!req.checker) {
     return res.send("Invalid JWT Token");
   }
-  const today=new Date();
-  let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-  axios.post(url+`conversations/${req.params.convo_id}.json`,{
-    sender:req.user_id,
-    receiver:req.params.id,
-    text:req.body.text,
-    time:time
-  }).then((resolve)=>{
-    return  res.json({
-      sender:req.user_id,
-      receiver:req.params.id,
-      text:req.body.text,
-      time:time
-    });
+  axios.post(url+`conversations/${req.params.convo_id}.json`,req.body).then((resolve)=>{
+    return res.send({s:"Success!",resolve});
   }).catch((err)=>{
     res.send(err);
   })

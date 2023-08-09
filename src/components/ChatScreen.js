@@ -7,7 +7,23 @@ const ChatScreen = () => {
   const { conversation_id } = useParams();
   const [msges, setmsges] = useState([]);
   const [header, setheader] = useState();
-  useEffect(() => {
+  const [msgtext, setmsgtext] = useState("");
+  // useEffect(() => {
+  //   axios
+  //     .get(`http://localhost:5000/getchats/${conversation_id.slice(1)}`, {
+  //       headers: {
+  //         "auth-token": context.jwt_token,
+  //       },
+  //     })
+  //     .then((res) => {
+  //       setheader(res.data.sender_id);
+  //       setmsges(res.data.messages);
+  //     })
+  //     .catch((err) => {
+  //       console.log(err);
+  //     });
+  // }, []);
+  const getter = () => {
     axios
       .get(`http://localhost:5000/getchats/${conversation_id.slice(1)}`, {
         headers: {
@@ -19,12 +35,42 @@ const ChatScreen = () => {
         setmsges(res.data.messages);
       })
       .catch((err) => {
-        alert(err);
+        timerr=0;
+        console.log(err);
       });
-  }, []);
-
+  };
+  const adder = async () => {
+    const today = new Date();
+    let time =
+      today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    axios
+      .post(
+        `http://localhost:5000/addchat/${conversation_id.slice(1)}`,
+        {
+          sender: header,
+          text: msgtext,
+          time: time,
+        },
+        {
+          headers: {
+            "auth-token": context.jwt_token,
+          },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        getter();
+        setmsgtext('');
+      })
+      .catch((err) => {
+        timerr=0;
+        console.log(err);
+      });
+  };
+  const timerr=setInterval(() => {
+    getter();
+  }, 2000);
   document.body.style.backgroundColor = "#91C8E4";
-  const [msgtext, setmsgtext] = useState("");
   return (
     <div>
       <center>
@@ -111,7 +157,7 @@ const ChatScreen = () => {
               padding: 10,
               marginLeft: "1.2%",
             }}
-            onClick={() => {}}
+            onClick={adder}
           >
             <i className="fa-solid fa-paper-plane"></i>
           </button>
