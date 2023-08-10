@@ -1,168 +1,201 @@
 const express = require("express");
-const axios = require("axios");
+const ConnecttoMongoDB = require("./db");
 const app = express();
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const uniqueness = require("./middleware/uniquecheck");
-const url = require("./FireBaseURL");
 const CheckUser = require("./middleware/CheckUser");
+const User = require("./models/Users");
+const Conversation = require("./models/Conversations");
+ConnecttoMongoDB();
+
 app.use(cors());
 app.use(express.json());
-app.post("/signup", uniqueness, (req, res) => {
+
+app.post("/signup", uniqueness, async (req, res) => {
   if (req.checker) {
     return res
       .status(401)
       .send("User with this email or phone number already exists!");
   } else {
-    axios
-      .post(url + "users.json", req.body)
-      .then((resolve) => {
-        return res.send("Sucessful!");
-      })
-      .catch((err) => {
-        return res.status(401).send("Unsucessful!");
-      });
+    try {
+      let user = await User.create(req.body);
+      return res.send("Sucessful");
+    } catch (error) {
+      return res.send("error");
+    }
   }
 });
-app.post("/login", (req, res) => {
-  const { id, pw } = req.body;
-  let num = parseInt(id);
+
+app.post("/login", async (req, res) => {
   try {
-    axios.get(url + "users.json").then((resolve) => {
-      let obj = {};
-      let check = 0;
-      if (isNaN(num)) {
-        check = 1;
+    const { id, pw } = req.body;
+    let user_mail = await User.findOne({ email: id });
+    let user_phone = await User.findOne({ phone: id });
+    if (user_mail === null && user_phone === null) {
+      throw res.send({ s: false, error: "No Such User found!" });
+    }
+    let user_detail;
+    if (user_mail) {
+      user_detail = user_mail;
+    } else {
+      user_detail = user_phone;
+    }
+    if (user_detail.password !== pw) {
+      throw res.send({ s: false, error: "Credentials do not match!" });
+    }
+    let obj = {
+      key: user_detail._id.toString(),
+      name: user_detail.name,
+      email: user_detail.email,
+      phone: user_detail.phone,
+      friends: user_detail.friends,
+    };
+    let privateKey = "YOUR_PRIVATE_KEY";
+    jwt.sign(obj.key, privateKey, function (err, token) {
+      if (err) {
+        throw res.send({ s: false, error: "Please try Again later!" });
       }
-      for (key in resolve.data) {
-        if (
-          !check
-            ? resolve.data[key].phone === id
-            : resolve.data[key].email === id
-        ) {
-          if (resolve.data[key].password === pw) {
-            obj = {
-              key: key,
-              name: resolve.data[key].name,
-              email: resolve.data[key].email,
-              phone: resolve.data[key].phone,
-              friends: resolve.data[key].friends,
-            };
-            break;
-          }
-        }
-      }
-      if (obj.key === undefined) {
-        return res.status(402).send("Credentials do not match!");
-      } else {
-        let privateKey = "YOUR_PRIVATE_KEY";
-        jwt.sign(obj.key, privateKey, function (err, token) {
-          if (err) {
-            return res.status(402).send({ s: false });
-          }
-          return res.send({ s: true, token, obj });
-        });
-      }
+      return res.send({ s: true, token, obj });
     });
   } catch (error) {
-    return res.status(401).send({ s: false, err: error });
+    return error;
   }
 });
+
 app.get("/getfriends/:searcher", CheckUser, async (req, res) => {
   if (!req.checker) {
     return res.send("Invalid JWT Token");
   }
-  const { searcher } = req.params;
   try {
-    const response = await axios.get(url + "users.json");
-    let obj = [];
-    for (key in response.data) {
-      if (
-        response.data[key].name === searcher ||
-        response.data[key].email === searcher ||
-        response.data[key].phone === searcher
-      ) {
-        obj.push({ name: response.data[key].name, id: key });
-      }
+    const { searcher } = req.params;
+    let id = searcher;
+    let user_mail = await User.findOne({ email: id });
+    let user_phone = await User.findOne({ phone: id });
+    let user_name = await User.find({ name: id });
+    if (user_mail === null && user_phone === null && user_name.length === 0) {
+      return res.status(402).send("No Such User Found!");
     }
-    return res.send(obj);
+    if (user_mail) {
+      let obj = [{ name: user_mail.name, id: user_mail._id.toString() }];
+      return res.send(obj);
+    }
+    if (user_phone) {
+      let obj = [{ name: user_phone.name, id: user_phone._id.toString() }];
+      return res.send(obj);
+    }
+    if (user_name) {
+      let obj = [];
+      for (let i = 0; i < user_name.length; i++) {
+        obj.push({ name: user_name[i].name, id: user_name[i]._id.toString() });
+      }
+      return res.send(obj);
+    }
   } catch (error) {
-    return res.send(error);
+    return res.send("error");
   }
 });
+
 app.put("/addfriend/:id", CheckUser, async (req, res) => {
   if (!req.checker) {
-    return res.send("Invalid JWT Token");
+    return res.send({ s: false, error: "Invalid JWT Token" });
   }
   try {
-    if(req.params.id===req.user_id){
-      throw res.status(401).send("You cannot be your own friend!");
+    const { id } = req.params;
+    if (id === req.user_id) {
+      return res.send({ s: false, error: "You cannot be your own friend!" });
     }
-    const obj = await axios.get(url + `users/${req.user_id}.json`);
-    const letobj = await axios.get(url + `users/${req.params.id}.json`);
-    let letfriend = [...letobj.data.friends];
-    let friendss = [...obj.data.friends];
-    for (let i = 1; i < friendss.length; i++) {
-      if (friendss[i].id === req.params.id) {
-        throw res.status(403).send("You are already friends!");
+    const response = await User.findById(req.user_id);
+    const friend_response = await User.findById(id);
+    if (response === null || friend_response === null) {
+      return res.send({ s: false, error: "User Not found!" });
+    }
+    for (let i = 0; i < response.friends.length; i++) {
+      if (response.friends[i].friend_id === id) {
+        return res.send({
+          s: false,
+          error: "This user is already your friend!",
+        });
       }
     }
-    for (let i = 1; i < letfriend.length; i++) {
-      if (letfriend[i].id === req.user_id) {
-        throw res.status(403).send("You are already friends!");
+    for (let i = 0; i < friend_response.friends.length; i++) {
+      if (friend_response.friends[i].friend_id === req.user_id) {
+        return res.send({
+          s: false,
+          error: "This user is already your friend!",
+        });
       }
     }
-    let conversation_id;
-    axios.post(url+'conversations.json',{init:"init"}).then(async(resolve)=>{
-      conversation_id=resolve.data.name;
-      friendss.push({ id: req.params.id, name: letobj.data.name ,conversation_id:conversation_id});
-    letfriend.push({ id: req.user_id, name: obj.data.name ,conversation_id:conversation_id});
-    obj.data.friends = friendss;
-    letobj.data.friends = letfriend;
-    
-    const response = await axios.put(
-      url + `users/${req.user_id}.json`,
-      obj.data
-    );
-    const letresponse = await axios.put(
-      url + `users/${req.params.id}.json`,
-      letobj.data
-    );
-    return res.send({s:"Sucess!",conversation_id});
-    }).catch((err)=>{
-      throw err;
-    })
+    let convo = await Conversation.create({
+      conversation: [
+        {
+          sender: "init",
+          text: "init",
+          time: "init",
+        },
+      ],
+    });
+    const conversation_id = convo._id.toString();
+    response.friends.push({
+      friend_id: req.params.id,
+      name: friend_response.name,
+      conversation_id: conversation_id,
+    });
+    friend_response.friends.push({
+      friend_id: req.user_id,
+      name: response.name,
+      conversation_id: conversation_id,
+    });
+    try {
+      const updater_user_id = await response.save();
+      const updater_params_id = await friend_response.save();
+    } catch (error) {
+      return res.send({ s: false, error: "Error! Please try again later!" });
+    }
+
+    return res.send({
+      s: true,
+      conversation_id,
+      friends: updater_user_id.friends,
+    });
   } catch (error) {
-    return res.send(error);
+    return error;
   }
 });
-app.post('/addchat/:convo_id',CheckUser,(req,res)=>{
-  if (!req.checker) {
-    return res.send("Invalid JWT Token");
-  }
-  axios.post(url+`conversations/${req.params.convo_id}.json`,req.body).then((resolve)=>{
-    return res.send({s:"Success!",resolve});
-  }).catch((err)=>{
-    res.send(err);
-  })
- 
-})
-app.get('/getchats/:con_id',CheckUser,async(req,res)=>{
+
+app.post("/addchat/:conversation_id", CheckUser, async (req, res) => {
   if (!req.checker) {
     return res.send("Invalid JWT Token");
   }
   try {
-    const response=await axios.get(url+ `conversations/${req.params.con_id}.json`);
-    let obj=[];
-    for(key in response.data){
-      if(key!=='init'){
-      obj.push(response.data[key])}
+    const { conversation_id } = req.params;
+    const response = await Conversation.findById(conversation_id);
+    response.conversation.push(req.body);
+    try {
+      response.save();
+      return res.send("Succesful");
+    } catch (error) {
+      return res.send("Error");
     }
-    res.send({messages:obj,sender_id:req.user_id});
   } catch (error) {
-    res.send(error);
+    return res.send("error");
   }
-})
+});
+
+app.get("/getchats/:con_id", CheckUser, async (req, res) => {
+  if (!req.checker) {
+    return res.send("Invalid JWT Token");
+  }
+  try {
+    const response = await Conversation.findById(req.params.con_id);
+    return res.send({
+      messages: response.conversation,
+      sender_id: req.user_id,
+    });
+  } catch (error) {
+    return res.send("error");
+  }
+});
 app.listen(5000, () => {
   console.log("HiChat");
 });

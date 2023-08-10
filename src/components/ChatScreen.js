@@ -8,21 +8,22 @@ const ChatScreen = () => {
   const [msges, setmsges] = useState([]);
   const [header, setheader] = useState();
   const [msgtext, setmsgtext] = useState("");
-  // useEffect(() => {
-  //   axios
-  //     .get(`http://localhost:5000/getchats/${conversation_id.slice(1)}`, {
-  //       headers: {
-  //         "auth-token": context.jwt_token,
-  //       },
-  //     })
-  //     .then((res) => {
-  //       setheader(res.data.sender_id);
-  //       setmsges(res.data.messages);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //     });
-  // }, []);
+  useEffect(() => {
+    axios
+      .get(`http://localhost:5000/getchats/${conversation_id.slice(1)}`, {
+        headers: {
+          "auth-token": context.jwt_token,
+        },
+      })
+      .then((res) => {
+        setheader(res.data.sender_id);
+        setmsges(res.data.messages.slice(1));
+      })
+      .catch((err) => {
+        alert(err);
+        navigate("/");
+      });
+  });
   const getter = () => {
     axios
       .get(`http://localhost:5000/getchats/${conversation_id.slice(1)}`, {
@@ -32,11 +33,11 @@ const ChatScreen = () => {
       })
       .then((res) => {
         setheader(res.data.sender_id);
-        setmsges(res.data.messages);
+        setmsges(res.data.messages.slice(1));
       })
       .catch((err) => {
-        timerr=0;
-        console.log(err);
+        alert(err);
+        navigate("/");
       });
   };
   const adder = async () => {
@@ -58,18 +59,14 @@ const ChatScreen = () => {
         }
       )
       .then((res) => {
-        console.log(res);
         getter();
-        setmsgtext('');
+        setmsgtext("");
       })
       .catch((err) => {
-        timerr=0;
-        console.log(err);
+        alert(err);
+        navigate("/");
       });
   };
-  const timerr=setInterval(() => {
-    getter();
-  }, 2000);
   document.body.style.backgroundColor = "#91C8E4";
   return (
     <div>

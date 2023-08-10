@@ -1,33 +1,17 @@
-const axios=require('axios');
-const url=require('../FireBaseURL')
-const checker=(req,res,next)=>{
-    const {phone,email}=req.body;
+const User = require("../models/Users");
+const checker = async (req, res, next) => {
+  const { phone, email } = req.body;
   try {
-    axios.get(url+"users.json")
-            .then((resolve) => {
-              let flag=1;
-              for (key in resolve.data) {
-                if (
-                  phone === resolve.data[key].phone ||
-                  email === resolve.data[key].email
-                ) {
-                  flag=0;
-                  break;
-                 
-                }
-              }
-              if(!flag){
-                  req.checker=1;
-                  next();
-                  return;
-              }
-              req.checker=0;
-              next();
-            })
+    let user_mail = await User.findOne({ email: email });
+    let user_phone = await User.findOne({ phone: phone });
+    if (user_mail || user_phone) {
+      req.checker = 1;
+    } else {
+      req.checker = 0;
+    }
   } catch (error) {
-    req.checker=1;
-   next();
-   return;
+    req.checker = 1;
   }
-}
-module.exports=checker;
+  next();
+};
+module.exports = checker;

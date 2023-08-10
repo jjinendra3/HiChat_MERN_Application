@@ -44,14 +44,15 @@ const AddFriends = () => {
         }
       )
       .then(async (res) => {
+        if (res.data.s === false) {
+          throw res.data.error;
+        }
         alert(`${name} is succesfully added to your lists.`);
         let arr = friendlist.filter((element) => {
           return element.id !== key;
         });
         setfriendlist(arr);
-        arr = [...context.totalfriends];
-        arr.push({ name: name, id: key,conversation_id:res.data.conversation_id });
-        context.settotalfriends(arr);
+        context.settotalfriends(res.data.friends);
       })
       .catch((err) => {
         alert(err);

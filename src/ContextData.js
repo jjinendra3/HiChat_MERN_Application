@@ -55,7 +55,7 @@ const HiChatData = ({ children }) => {
         phone: signup.phone,
         email: signup.email,
         password: signup.pw,
-        friends: ["Init"],
+        friends: [{ friend_id: "Init", name: "init", conversation_id: "init" }],
       })
       .then((res) => {
         setsignup({
@@ -74,6 +74,7 @@ const HiChatData = ({ children }) => {
         );
       });
   };
+
   const Login = (login, setlogin) => {
     if (login.id === "" || login.pw === "") {
       alert("Please enter all the fields to login.");
@@ -85,6 +86,9 @@ const HiChatData = ({ children }) => {
         pw: login.pw,
       })
       .then((res) => {
+        if (res.data.s === false) {
+          throw res.data.error;
+        }
         setlogin({
           id: "",
           pw: "",
@@ -96,24 +100,16 @@ const HiChatData = ({ children }) => {
         navigate("/");
       })
       .catch((error) => {
-        alert("Credentials do not match!");
+        alert(error);
       });
   };
-  const GetUser = async () => {
-    const response = await axios.get("http://localhost:5000/chatlist", {
-      headers: {
-        "auth-token": jwt_token,
-      },
-    });
-    setuser_details(response.data);
-  };
+
   return (
     <HiChat.Provider
       value={{
         jwt_token,
         Signup,
         Login,
-        GetUser,
         user_details,
         setjwt_token,
         totalfriends,
