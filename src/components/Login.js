@@ -51,9 +51,6 @@ function Login() {
               value={login.id}
               onChange={onChange}
             />
-            <div id="emailHelp" className="form-text">
-              We'll never share your details with anyone else.
-            </div>
           </div>
           <div className="mb-3">
             <label htmlFor="exampleInputPassword1" className="form-label">

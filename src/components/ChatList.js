@@ -3,11 +3,12 @@ import icon from "../icon.png";
 import { Link } from "react-router-dom";
 import ContextApi from "../ContextApi";
 function ChatList() {
-  const [arr, setarr] = useState([]);
   const context = useContext(ContextApi);
+  const [first, setfirst] = useState([]);
   useEffect(() => {
-    if (context.totalfriends) {
-      setarr(context.totalfriends.slice(1));
+    if (context.jwt_token) {
+      let arr = [...context.totalfriends];
+      setfirst(arr);
     }
   }, []);
   document.body.style.backgroundColor = "#91C8E4";
@@ -17,10 +18,13 @@ function ChatList() {
       <center style={{ marginTop: "5%" }}>
         <div className="list">
           {context.jwt_token ? (
-            arr.length !== 0 ? (
-              arr.map((element) => {
+            first.slice(1).length !== 0 ? (
+              first.slice(1).map((element) => {
                 return (
-                  <Link to={`/chat/:${element.conversation_id}`}>
+                  <Link
+                    to={`/chat/:${element.conversation_id}`}
+                    key={element.conversation_id}
+                  >
                     <div>
                       <div
                         className="list-item"

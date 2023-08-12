@@ -1,19 +1,9 @@
-import React, { useState,useContext, useEffect } from "react";
-import { Link} from "react-router-dom";
-import ContextAPI from '../ContextApi';
+import React, { useState, useContext, useEffect } from "react";
+import { Link } from "react-router-dom";
+import ContextAPI from "../ContextApi";
 const SignUp = () => {
-  const context=useContext(ContextAPI);
+  const context = useContext(ContextAPI);
   document.body.style.backgroundColor = "#91C8E4";
-  // const [loading, setloading] = useState(false);
-  // useEffect(() => {
-  //   if(loading){
-  //     console.lo
-  //     return (
-  //       <Loading/>
-  //     )
-  //   }
-  // }, [loading])
-  
   const [signup, setsignup] = useState({
     name: "",
     email: "",
@@ -24,12 +14,9 @@ const SignUp = () => {
   const onChange = (event) => {
     setsignup({ ...signup, [event.target.name]: event.target.value });
   };
-  
   const onSubmit = async (event) => {
-    // setloading(true);
     event.preventDefault();
-    context.Signup(signup,setsignup);
-    // setloading(false);
+    context.Signup(signup, setsignup);
   };
   return (
     <>

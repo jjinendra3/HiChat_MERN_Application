@@ -3,15 +3,12 @@ const { Schema } = mongoose;
 const Messages = new Schema({
   sender: {
     type: String,
-    required: true,
   },
   text: {
     type: String,
-    required: true,
   },
   time: {
     type: String,
-    required: true,
   },
 });
 const Conversations = new Schema({

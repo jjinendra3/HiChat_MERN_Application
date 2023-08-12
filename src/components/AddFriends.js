@@ -11,7 +11,7 @@ const AddFriends = () => {
     if (context.jwt_token === undefined) {
       navigate("/login");
     }
-  }, []);
+  });
 
   const onChange = (event) => {
     setsearcher(event.target.value);
@@ -19,44 +19,41 @@ const AddFriends = () => {
   const SearchFriend = (event) => {
     event.preventDefault();
     axios
-      .get(`http://localhost:5000/getfriends/${searcher}`, {
+      .get(`http://localhost:5000/friends/getfriends/${searcher}`, {
         headers: {
           "auth-token": context.jwt_token,
         },
       })
       .then(async (res) => {
-        setfriendlist([...res.data]);
+        const arr = [...res.data.obj];
+        setfriendlist(arr);
         setsearcher("");
       })
       .catch((err) => {
         alert(err);
       });
   };
-  const adder = (key, name) => {
-    axios
-      .put(
-        `http://localhost:5000/addfriend/${key}`,
+  const adder = async (key, name) => {
+    try {
+      const res = await axios.put(
+        `http://localhost:5000/friends/addfriend/${key}`,
         {},
         {
           headers: {
             "auth-token": context.jwt_token,
           },
         }
-      )
-      .then(async (res) => {
-        if (res.data.s === false) {
-          throw res.data.error;
-        }
-        alert(`${name} is succesfully added to your lists.`);
-        let arr = friendlist.filter((element) => {
-          return element.id !== key;
-        });
-        setfriendlist(arr);
-        context.settotalfriends(res.data.friends);
-      })
-      .catch((err) => {
-        alert(err);
-      });
+      );
+      if (res.data.s === false) {
+        throw res.data.error;
+      }
+      alert(`${name} is succesfully added to your lists.`);
+      setfriendlist([]);
+      let arr = [...res.data.friends];
+      context.settotalfriends(arr);
+    } catch (error) {
+      alert(error);
+    }
   };
   return (
     <center>
@@ -114,7 +111,7 @@ const AddFriends = () => {
           {friendlist.length !== 0 &&
             friendlist.map((element) => {
               return (
-                <div>
+                <div key={element.id}>
                   <div
                     className="list-item"
                     style={{

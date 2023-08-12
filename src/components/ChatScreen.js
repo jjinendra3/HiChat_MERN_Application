@@ -1,52 +1,64 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useRef } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import ContextAPi from "../ContextApi";
 const ChatScreen = () => {
+  const navigate = useNavigate();
   const context = useContext(ContextAPi);
   const { conversation_id } = useParams();
   const [msges, setmsges] = useState([]);
   const [header, setheader] = useState();
   const [msgtext, setmsgtext] = useState("");
-  useEffect(() => {
-    axios
-      .get(`http://localhost:5000/getchats/${conversation_id.slice(1)}`, {
-        headers: {
-          "auth-token": context.jwt_token,
-        },
-      })
-      .then((res) => {
-        setheader(res.data.sender_id);
-        setmsges(res.data.messages.slice(1));
-      })
-      .catch((err) => {
-        alert(err);
-        navigate("/");
-      });
-  });
-  const getter = () => {
-    axios
-      .get(`http://localhost:5000/getchats/${conversation_id.slice(1)}`, {
-        headers: {
-          "auth-token": context.jwt_token,
-        },
-      })
-      .then((res) => {
-        setheader(res.data.sender_id);
-        setmsges(res.data.messages.slice(1));
-      })
-      .catch((err) => {
-        alert(err);
-        navigate("/");
-      });
+  const getter = async () => {
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/chat/getchats/${conversation_id.slice(1)}`,
+        {
+          headers: {
+            "auth-token": context.jwt_token,
+          },
+        }
+      );
+      if (res.data.s === false) {
+        throw res.data.error;
+      }
+      setheader(res.data.sender_id);
+      setmsges(res.data.messages.slice(1));
+    } catch (err) {
+      alert(err);
+      navigate("/");
+    }
   };
+  const scrollContainerRef = useRef(null);
+  useEffect(() => {
+    if (!context.jwt_token) {
+      navigate("/login");
+    }
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+    async function caller() {
+      await getter();
+    }
+    caller();
+  });
+
   const adder = async () => {
     const today = new Date();
+    let ms = Math.floor(Math.random() * 99 + 1);
     let time =
-      today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+      today.getHours() +
+      ":" +
+      today.getMinutes() +
+      ":" +
+      today.getSeconds() +
+      ":" +
+      ms;
     axios
       .post(
-        `http://localhost:5000/addchat/${conversation_id.slice(1)}`,
+        `http://localhost:5000/chat/addchat/${conversation_id.slice(1)}`,
         {
           sender: header,
           text: msgtext,
@@ -72,6 +84,7 @@ const ChatScreen = () => {
     <div>
       <center>
         <div
+          ref={scrollContainerRef}
           className="chat"
           id="chatarea"
           style={{
@@ -101,7 +114,6 @@ const ChatScreen = () => {
                     className="msg"
                     style={{
                       border: "1px solid blue",
-                      width: "20%",
                       display: "flex",
                       borderRadius: 10,
                       marginTop: "0.5%",
@@ -111,6 +123,9 @@ const ChatScreen = () => {
                     }}
                   >
                     <p>{element.text}</p>
+                    <small style={{ marginTop: "30%", left: "30%" }}>
+                      {element.time}
+                    </small>
                   </div>
                 </div>
               );
@@ -153,6 +168,7 @@ const ChatScreen = () => {
               borderRadius: 20,
               padding: 10,
               marginLeft: "1.2%",
+              marginRight: "2.5%",
             }}
             onClick={adder}
           >

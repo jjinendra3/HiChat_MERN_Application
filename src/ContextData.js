@@ -50,7 +50,7 @@ const HiChatData = ({ children }) => {
     }
 
     axios
-      .post("http://localhost:5000/signup", {
+      .post("http://localhost:5000/auth/signup", {
         name: signup.name,
         phone: signup.phone,
         email: signup.email,
@@ -66,7 +66,7 @@ const HiChatData = ({ children }) => {
           cpw: "",
         });
         alert(`Welcome to HiChat, ${signup.name}`);
-        navigate("/");
+        navigate("/login");
       })
       .catch((error) => {
         alert(
@@ -81,7 +81,7 @@ const HiChatData = ({ children }) => {
       return;
     }
     axios
-      .post("http://localhost:5000/login", {
+      .post("http://localhost:5000/auth/login", {
         id: login.id,
         pw: login.pw,
       })

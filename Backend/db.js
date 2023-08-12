@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const mongoURI = "mongodb://0.0.0.0:27017/hichat";
+const mongoURI = "mongodb://YOUR_IP_ADDRESS/hichat";
 const ConnecttoMongoDB = () => {
   mongoose.connect(mongoURI).then(() => {
     console.log("MongoDB Connection Succesful!");
