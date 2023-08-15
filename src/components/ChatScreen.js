@@ -10,6 +10,8 @@ const ChatScreen = () => {
   const [msges, setmsges] = useState([]);
   const [header, setheader] = useState();
   const [msgtext, setmsgtext] = useState("");
+  const [modal, setmodal] = useState();
+  const [elemental, setelemental] = useState();
   const getter = async () => {
     try {
       const res = await axios.get(
@@ -79,6 +81,29 @@ const ChatScreen = () => {
         navigate("/");
       });
   };
+  const Textchanger = async (element, flag) => {
+    if (flag) {
+      element.text = modal;
+    } else {
+      element.text = "This message was deleted.";
+    }
+    try {
+      const response = await axios.put(
+        `http://localhost:5000/chat/editchat/${conversation_id.slice(1)}`,
+        { element },
+        {
+          headers: {
+            "auth-token": context.jwt_token,
+          },
+        }
+      );
+      setmodal();
+      setelemental();
+      alert("Changes Done");
+    } catch (error) {
+      alert("Some Error occured please try again later.");
+    }
+  };
   document.body.style.backgroundColor = "#91C8E4";
   return (
     <div>
@@ -104,6 +129,14 @@ const ChatScreen = () => {
                 <div
                   key={element.time}
                   className="mmsssg"
+                  data-bs-toggle={header === element.sender && "modal"}
+                  data-bs-target={
+                    header === element.sender && "#staticBackdrop"
+                  }
+                  onClick={() => {
+                    setmodal(element.text);
+                    setelemental(element);
+                  }}
                   style={
                     header === element.sender
                       ? { justifyContent: "right", display: "flex" }
@@ -124,7 +157,7 @@ const ChatScreen = () => {
                   >
                     <p>{element.text}</p>
                     <small style={{ marginTop: "30%", left: "30%" }}>
-                      {element.time}
+                      {element.time.slice(0, -3)}
                     </small>
                   </div>
                 </div>
@@ -176,6 +209,65 @@ const ChatScreen = () => {
           </button>
         </div>
       </center>
+      <div
+        className="modal fade"
+        id="staticBackdrop"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabIndex="-1"
+        aria-labelledby="staticBackdropLabel"
+        aria-hidden="true"
+      >
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="staticBackdropLabel">
+                Modal title
+              </h1>
+              <button
+                type="button"
+                className="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div className="modal-body">
+              <center>
+                <textarea
+                  type="text"
+                  value={modal}
+                  onChange={(event) => {
+                    setmodal(event.target.value);
+                  }}
+                  style={{ width: "100%" }}
+                />
+              </center>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                data-bs-dismiss="modal"
+                onClick={() => {
+                  Textchanger(elemental, 0);
+                }}
+              >
+                Delete
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                data-bs-dismiss="modal"
+                onClick={() => {
+                  Textchanger(elemental, 1);
+                }}
+              >
+                Edit
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -24,7 +24,7 @@ app.post("/addchat/:conversation_id", CheckUser, async (req, res) => {
 
 app.get("/getchats/:con_id", CheckUser, async (req, res) => {
   if (!req.checker) {
-    return res.send({s:false,error:"Invalid JWT Token"});
+    return res.send({ s: false, error: "Invalid JWT Token" });
   }
   try {
     const response = await Conversation.findById(req.params.con_id);
@@ -33,7 +33,27 @@ app.get("/getchats/:con_id", CheckUser, async (req, res) => {
       sender_id: req.user_id,
     });
   } catch (error) {
-    return res.send({s:false,error:"error"});
+    return res.send({ s: false, error: "error" });
   }
 });
+
+app.put("/editchat/:id", CheckUser, async (req, res) => {
+  if (!req.checker) {
+    return res.send({ s: false, error: "Invalid JWT Token" });
+  }
+  try {
+    const response = await Conversation.findById(req.params.id);
+    for (let i = 0; i < response.conversation.length; i++) {
+      if (response.conversation[i]._id.toString() === req.body.element._id) {
+        response.conversation[i].text = req.body.element.text;
+        break;
+      }
+    }
+    const letter = await response.save();
+    res.send("Sucessful");
+  } catch (error) {
+    res.send({ error });
+  }
+});
+
 module.exports = app;
