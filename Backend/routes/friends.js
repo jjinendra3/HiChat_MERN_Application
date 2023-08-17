@@ -116,4 +116,68 @@ app.put("/addfriend/:id", CheckUser, async (req, res) => {
     return error;
   }
 });
+
+app.delete("/deletefriend/:c_id/:f_id", CheckUser, async (req, res) => {
+  if (!req.checker) {
+    return res.send({ s: false, error: "Invalid JWT Token" });
+  }
+  try {
+    const finder = await Conversation.findById(req.params.c_id);
+    if (finder === null) {
+      return res.send({ s: false, error: "Conversation Already Deleted." });
+    }
+    const deleter = await Conversation.findByIdAndDelete(req.params.c_id);
+    const response = await User.findById(req.user_id);
+    const friend_response = await User.findById(req.params.f_id);
+    let res_obj = [];
+    let res_friend_obj = [];
+    for (let i = 0; i < response.friends.length; i++) {
+      if (response.friends[i].friend_id !== req.params.f_id) {
+        res_obj.push(response.friends[i]);
+      }
+    }
+    response.friends = res_obj;
+    for (let i = 0; i < friend_response.friends.length; i++) {
+      if (friend_response.friends[i].friend_id !== req.user_id) {
+        res_friend_obj.push(friend_response.friends[i]);
+      }
+    }
+    friend_response.friends = res_friend_obj;
+    let resso = await response.save();
+    let frienda = await friend_response.save();
+    res.send({ s: true, success: "Success!" });
+  } catch (error) {
+    res.send({
+      s: false,
+      error: "Some error occured, please try again later!",
+    });
+  }
+});
+
+app.delete("/deleteconvo/:c_id", CheckUser, async (req, res) => {
+  if (!req.checker) {
+    return res.send({ s: false, error: "Invalid JWT Token" });
+  }
+  try {
+    const finder = await Conversation.findById(req.params.c_id);
+    if (finder === null) {
+      return res.send({ s: false, error: "Conversation Already Deleted." });
+    }
+    finder.conversation = [
+      {
+        sender: "init",
+        text: "init",
+        time: "init",
+      },
+    ];
+    let ok = await finder.save();
+    res.send({ s: true, success: "Success!" });
+  } catch (error) {
+    res.send({
+      s: false,
+      error: "Some error occured, please try again later!",
+    });
+  }
+});
+
 module.exports = app;
