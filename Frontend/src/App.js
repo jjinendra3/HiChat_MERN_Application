@@ -12,14 +12,18 @@ function App() {
   return (
     <BrowserRouter>
       <HiChatData>
-      <Navbar />
+        <Navbar />
         <Routes>
           <Route exact path="/" element={<ChatList />} />
           <Route exact path="/addfriends" element={<AddFriends />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/about" element={<About />} />
           <Route exact path="/signup" element={<SignUp />} />
-          <Route exact path="/chat/:conversation_id" element={<ChatScreen />} />
+          <Route
+            exact
+            path="/chat/:conversation_id/:friend_id"
+            element={<ChatScreen />}
+          />
         </Routes>
       </HiChatData>
     </BrowserRouter>

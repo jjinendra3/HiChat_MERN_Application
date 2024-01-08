@@ -15,5 +15,15 @@ const Conversations = new Schema({
   conversation: {
     type: [Messages],
   },
+  typing: {
+    user1: {
+      type: String,
+      default: "",
+    },
+    user2: {
+      type: String,
+      default: "",
+    },
+  },
 });
 module.exports = mongoose.model("conversations", Conversations);

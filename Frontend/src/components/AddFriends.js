@@ -42,7 +42,7 @@ const AddFriends = () => {
           headers: {
             "auth-token": context.jwt_token,
           },
-        }
+        },
       );
       if (res.data.s === false) {
         throw res.data.error;

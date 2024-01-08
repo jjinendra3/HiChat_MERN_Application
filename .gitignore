@@ -7,7 +7,7 @@
 /Backend/node_modules
 # testing
 /coverage
-
+/Frontend/node_modules
 # production
 /build
 

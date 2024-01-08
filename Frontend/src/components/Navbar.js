@@ -1,6 +1,10 @@
-import React from "react";
-import { Link} from "react-router-dom";
+import React, { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import ContextApi from "../ContextApi";
 const Navbar = () => {
+  const navigate = useNavigate();
+  const context = useContext(ContextApi);
   return (
     <>
       <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -42,6 +46,26 @@ const Navbar = () => {
               </li>
             </ul>
           </div>
+          {context.jwt_token && (
+            <button
+              style={{ marginRight: 5 }}
+              onClick={async () => {
+                try {
+                  await axios.get("http://localhost:5000/auth/logout", {
+                    headers: {
+                      "auth-token": context.jwt_token,
+                    },
+                  });
+                  navigate("/login");
+                } catch (error) {
+                  console.log(error);
+                  alert("There is an error, please try again some time later.");
+                }
+              }}
+            >
+              Logout
+            </button>
+          )}
           <Link className="nav-link active" to="/login">
             Login/Signup
           </Link>

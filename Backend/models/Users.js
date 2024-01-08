@@ -37,5 +37,9 @@ const Userschema = new Schema({
     type: Array,
     default: [Friends],
   },
+  online: {
+    type: Boolean,
+    default: false,
+  },
 });
 module.exports = mongoose.model("user", Userschema);

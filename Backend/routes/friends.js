@@ -89,6 +89,10 @@ app.put("/addfriend/:id", CheckUser, async (req, res) => {
           time: "init",
         },
       ],
+      typing: {
+        user1: "",
+        user2: "",
+      },
     });
     const conversation_id = convo._id.toString();
     response.friends.push({
@@ -177,6 +181,35 @@ app.delete("/deleteconvo/:c_id", CheckUser, async (req, res) => {
       s: false,
       error: "Some error occured, please try again later!",
     });
+  }
+});
+app.get("/getmyfriends", CheckUser, async function (req, res) {
+  if (!req.checker) {
+    return res.send({ s: false, error: "Invalid Jwt Token!" });
+  }
+  try {
+    const user_detail = await User.findById(req.user_id);
+    const frr = user_detail.friends.slice(1);
+
+    const arr = [];
+
+    for (const friend of frr) {
+      const frien = await User.findById(friend.friend_id);
+
+      const ob = {
+        friend_id: friend.friend_id,
+        name: friend.name,
+        conversation_id: friend.conversation_id,
+        online: frien.online,
+      };
+
+      arr.push(ob);
+    }
+
+    res.send(arr);
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ s: false, error: "Internal Server Error" });
   }
 });
 

@@ -10,6 +10,12 @@ app.post("/addchat/:conversation_id", CheckUser, async (req, res) => {
   try {
     const { conversation_id } = req.params;
     const response = await Conversation.findById(conversation_id);
+    if (response.typing.user1 === req.user_id) {
+      response.typing.user1 = "";
+    }
+    if (response.typing.user2 === req.user_id) {
+      response.typing.user2 = "";
+    }
     response.conversation.push(req.body);
     try {
       response.save();
@@ -31,6 +37,7 @@ app.get("/getchats/:con_id", CheckUser, async (req, res) => {
     return res.send({
       messages: response.conversation,
       sender_id: req.user_id,
+      typing: response.typing,
     });
   } catch (error) {
     return res.send({ s: false, error: "error" });
@@ -53,6 +60,24 @@ app.put("/editchat/:id", CheckUser, async (req, res) => {
     res.send("Sucessful");
   } catch (error) {
     res.send({ error });
+  }
+});
+
+app.get("/addtyping/:id", CheckUser, async function (req, res) {
+  if (!req.checker) {
+    return res.send({ s: false, error: "Invalid JWT Token" });
+  }
+  try {
+    const conversation = await Conversation.findById(req.params.id);
+    if (conversation.typing.user1 === "") {
+      conversation.typing.user1 = req.user_id;
+    } else {
+      conversation.typing.user2 = req.user_id;
+    }
+    await conversation.save();
+    res.send("Succes!");
+  } catch (error) {
+    res.send(error);
   }
 });
 

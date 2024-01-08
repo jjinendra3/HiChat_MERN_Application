@@ -6,12 +6,18 @@ import ContextAPi from "../ContextApi";
 const ChatScreen = () => {
   const navigate = useNavigate();
   const context = useContext(ContextAPi);
-  const { conversation_id } = useParams();
+  const { conversation_id, friend_id } = useParams();
   const [msges, setmsges] = useState([]);
   const [header, setheader] = useState();
   const [msgtext, setmsgtext] = useState("");
   const [modal, setmodal] = useState();
   const [elemental, setelemental] = useState();
+  const [metyping, setmetyping] = useState(false);
+  const [typestatus, settypestatus] = useState({
+    user1: "",
+    user2: "",
+  });
+
   const getter = async () => {
     try {
       const res = await axios.get(
@@ -20,11 +26,12 @@ const ChatScreen = () => {
           headers: {
             "auth-token": context.jwt_token,
           },
-        }
+        },
       );
       if (res.data.s === false) {
         throw res.data.error;
       }
+      settypestatus(res.data.typing);
       setheader(res.data.sender_id);
       setmsges(res.data.messages.slice(1));
     } catch (err) {
@@ -48,6 +55,7 @@ const ChatScreen = () => {
   });
 
   const adder = async () => {
+    setmetyping(false);
     const today = new Date();
     let ms = Math.floor(Math.random() * 99 + 1);
     let time =
@@ -70,7 +78,7 @@ const ChatScreen = () => {
           headers: {
             "auth-token": context.jwt_token,
           },
-        }
+        },
       )
       .then((res) => {
         getter();
@@ -88,14 +96,14 @@ const ChatScreen = () => {
       element.text = "This message was deleted.";
     }
     try {
-      const response = await axios.put(
+      await axios.put(
         `http://localhost:5000/chat/editchat/${conversation_id.slice(1)}`,
         { element },
         {
           headers: {
             "auth-token": context.jwt_token,
           },
-        }
+        },
       );
       setmodal();
       setelemental();
@@ -108,6 +116,12 @@ const ChatScreen = () => {
   return (
     <div>
       <center>
+        <p>
+          {typestatus.user1 === friend_id.slice(1) ||
+          typestatus.user2 === friend_id.slice(1)
+            ? "Your Friend is typing..."
+            : ""}
+        </p>
         <div
           ref={scrollContainerRef}
           className="chat"
@@ -191,8 +205,25 @@ const ChatScreen = () => {
               padding: 5,
             }}
             value={msgtext}
-            onChange={(event) => {
-              setmsgtext(event.target.value);
+            onChange={async (event) => {
+              try {
+                setmsgtext(event.target.value);
+                if (!metyping) {
+                  await axios.get(
+                    `http://localhost:5000/chat/addtyping/${conversation_id.slice(
+                      1,
+                    )}`,
+                    {
+                      headers: {
+                        "auth-token": context.jwt_token,
+                      },
+                    },
+                  );
+                  setmetyping(true);
+                }
+              } catch (error) {
+                console.log(error);
+              }
             }}
           />
           <button
@@ -222,7 +253,7 @@ const ChatScreen = () => {
           <div className="modal-content">
             <div className="modal-header">
               <h1 className="modal-title fs-5" id="staticBackdropLabel">
-                Modal title
+                Edit Chat
               </h1>
               <button
                 type="button"

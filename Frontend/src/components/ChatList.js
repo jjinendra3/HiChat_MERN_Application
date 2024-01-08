@@ -7,8 +7,23 @@ function ChatList() {
   const context = useContext(ContextApi);
   const [first, setfirst] = useState([]);
   useEffect(() => {
+    async function getMyfriends() {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/friends/getmyfriends`,
+          {
+            headers: {
+              "auth-token": context.jwt_token,
+            },
+          },
+        );
+        setfirst(response.data);
+      } catch (error) {
+        alert("Internal server");
+      }
+    }
     if (context.jwt_token) {
-      setfirst(context.totalfriends);
+      getMyfriends();
     }
   });
   const friend_deleter = async (element) => {
@@ -19,7 +34,7 @@ function ChatList() {
           headers: {
             "auth-token": context.jwt_token,
           },
-        }
+        },
       )
       .then((res) => {
         if (res.data.s === false) {
@@ -40,13 +55,13 @@ function ChatList() {
           headers: {
             "auth-token": context.jwt_token,
           },
-        }
+        },
       )
       .then((res) => {
         if (res.data.s === false) {
           return alert("There is some error please try again later!");
         }
-        alert("Friend deleted succefully!");
+        alert("Conversation deleted succefully!");
       });
   };
   document.body.style.backgroundColor = "#91C8E4";
@@ -56,12 +71,12 @@ function ChatList() {
       <center style={{ marginTop: "5%" }}>
         <div className="list">
           {context.jwt_token ? (
-            first.slice(1).length !== 0 ? (
-              first.slice(1).map((element) => {
+            first.length !== 0 ? (
+              first.map((element) => {
                 return (
                   <>
                     <Link
-                      to={`/chat/:${element.conversation_id}`}
+                      to={`/chat/:${element.conversation_id}/:${element.friend_id}`}
                       key={element.conversation_id}
                     >
                       <div>
@@ -88,6 +103,7 @@ function ChatList() {
                           </div>
                           <div className="info" style={{ fontWeight: "bold" }}>
                             <p> {element.name} </p>
+                            <p>{element.online ? "🟢Online" : "🔴Offline"}</p>
                           </div>
                         </div>
                       </div>

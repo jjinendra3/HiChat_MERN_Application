@@ -1,35 +1,62 @@
-# About HiChat: A Real-time MERN Chatting Application
 
-HiChat is a cutting-edge fullstack web project that showcases my expertise in developing interactive and secure web applications. Built on the MERN (MongoDB, Express.js, React, Node.js) stack, HiChat is a feature-rich real-time chatting application that takes user interaction to the next level.
+## Documentation: HiChat - Real-Time Chat Application
+This documentation is designed to guide you through the installation, features, and usage of HiChat. For a more brief walkthrough, watch the implementation video available on [Youtube](https://youtu.be/-EM2hSC4wN4)
 
-## Key Features
+### Prerequisites
+Before you begin, ensure you have the following requirements:
+1. **Node.js:**
+   - Install the latest version of Node.js.
+   - Ensure npm (Node Package Manager) is globally installed.
+2. **MongoDB Compass:**
+   - Download and install MongoDB Compass for convenient database management.
 
-### Real-time Communication
-HiChat revolutionizes online communication by offering seamless real-time messaging. Users can connect with their friends and engage in live conversations without any delays or page refreshes. The application utilizes WebSockets to instantly update messages on both ends, creating a dynamic and engaging chatting experience.
+### Getting Started
 
-### Secure Authentication
-Security is at the forefront of HiChat. The application employs industry-standard encryption techniques such as bcrypt to securely store and manage user passwords. JWT (JSON Web Tokens) are utilized for user authorization at every step, ensuring a safe and trusted environment for users to interact.
+1. **Download and Setup:**
+   - Open the terminal and Run ‘npm run installer’
+   - Run `npm run starter` to start the client and server.
+   - Open another terminal and Run `cd frontend`.
+   - Run `npm run start` (press y if it asks to open another port) to start the second client.
+   - Two browsers will open, simulating two different users.
 
-### Friend System
-HiChat enhances social interaction by allowing users to connect with friends. Users can send friend requests, expanding their network and enabling private conversations. The friend system is designed for ease of use and a seamless user experience.
 
-### Modern User Interface
-HiChat boasts a modern and intuitive user interface built with React. The clean and user-friendly design enhances usability and encourages engagement, making it easy for users to navigate, chat, and manage their connections.
+### Features
 
-## Developer's Note
+- **Authentication:**
+   - Implemented using bcrypt for password hashing and JWT for secure user sessions.
 
-HiChat is the result of my passion for building innovative and impactful web applications.
+- **Real-time Messaging:**
+   - Utilizes pooling for seamless real-time message fetching and sending.
+   - Users can edit and delete their sent messages.
 
-Through the implementation of real-time messaging, robust authentication, and a thoughtfully designed friend system, I aimed to showcase my technical skills while creating a practical and enjoyable platform for users to connect.
+- **Online and Typing Status:**
+   - Displays real-time status updates for friends, indicating whether they are online & typing or not.
 
-I invite you to explore HiChat and witness firsthand the power of real-time communication, secure authentication, and modern web development.
+- **Friend Management:**
+   - Users can add and remove friends.
+   - Initiate and delete conversations.
+   - Conversations and friends can be managed conveniently.
 
-Connect with me to learn more about my journey in creating HiChat and to discuss how my skills can contribute to your team.
+### How to Use the Application
 
-**Contact Information:**
+   - Sign up by clicking "Login/Signup" and then "Signup" on the login page.
+   - Create atleast two accounts with your details, ensuring a 10-digit phone number and a valid email address.
+
+   - Log in with one of the accounts, navigate to "Add Friends."
+   - Enter the exact name/email/phone number of the friend to add.
+   - If an error occurs, ensure there are no whitespaces in the input or stored database.
+
+   - Go to the home page, find the added friend in the list, and click to start chatting.
+   - Log in with the second account in a different browser window to see the friend in the friendlist.
+   - Users can also edit and delete sent messages within the conversation.
+   - After chatting, log out from one browser window, and observe the online status update in the other (It will go offline).
+
+   - Users can also delete conversations and remove friends as per their convenience.
+
+### Developer
+
+Made by Jinendra Jain
+
 - Email: [jjinendra3@gmail.com](mailto:jjinendra3@gmail.com)
 - LinkedIn: [Jinendra jain](https://www.linkedin.com/in/jjinendra3/)
 - GitHub: [Jinendra Jain](https://github.com/jjinendra3)
-
-
-Thank you for considering my project. I look forward to connecting with you and discussing the exciting possibilities HiChat and my expertise bring to your organization.

@@ -28,7 +28,7 @@ const HiChatData = ({ children }) => {
     }
     if (isNaN(num)) {
       alert(
-        "Phone number should not contain any dashes, pluses or any special character, only numbers are allowed."
+        "Phone number should not contain any dashes, pluses or any special character, only numbers are allowed.",
       );
       return;
     }
@@ -70,7 +70,7 @@ const HiChatData = ({ children }) => {
       })
       .catch((error) => {
         alert(
-          "The Email or the phone number is already in use, please try again!"
+          "The Email or the phone number is already in use, please try again!",
         );
       });
   };
