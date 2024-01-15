@@ -3,22 +3,44 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import ContextAPi from "../ContextApi";
+import io from "socket.io-client";
+
+const socket = io("http://localhost:5000");
 const ChatScreen = () => {
   const navigate = useNavigate();
   const context = useContext(ContextAPi);
-  const { conversation_id, friend_id } = useParams();
+   const { conversation_id, friend_id } = useParams();
+   let con=conversation_id.slice(1);
+  let fri=friend_id.slice(1);
   const [msges, setmsges] = useState([]);
   const [header, setheader] = useState();
   const [msgtext, setmsgtext] = useState("");
   const [modal, setmodal] = useState();
   const [elemental, setelemental] = useState();
-  const [metyping, setmetyping] = useState(false);
-  const [typestatus, settypestatus] = useState({
+  const [metyping, setmetyping] = useState(false); 
+   const [typestatus, settypestatus] = useState({
     user1: "",
     user2: "",
   });
+// const [onetime, setonetime] = useState(null);
+let onetime=null;
+  async function sockethelp(msg){
+    if (msg.conid === conversation_id.slice(1)) {
+      if (msg.sender === friend_id.slice(1)) {
+        const obj = {
+          sender: msg.sender,
+          text: msg.text,
+          time: msg.time,
+        };
+      if(onetime!==obj){
+         onetime=obj;
+        setmsges((prevMsges) => [...prevMsges, obj]);
+      }
+      }
+    }
+  }
 
-  const getter = async () => {
+    const getter = async () => {
     try {
       const res = await axios.get(
         `http://localhost:5000/chat/getchats/${conversation_id.slice(1)}`,
@@ -39,6 +61,7 @@ const ChatScreen = () => {
       navigate("/");
     }
   };
+
   const scrollContainerRef = useRef(null);
   useEffect(() => {
     if (!context.jwt_token) {
@@ -48,11 +71,45 @@ const ChatScreen = () => {
     if (scrollContainer) {
       scrollContainer.scrollTop = scrollContainer.scrollHeight;
     }
+  });
+
+  useEffect(() => {
     async function caller() {
       await getter();
     }
     caller();
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+  socket.on(`message${con}${fri}`, async(msg) => {
+    try {
+      await sockethelp(msg);
+    } catch (error) {
+      console.log(error);
+    }
   });
+  socket.on(`typing${con}`, async(msg) => {
+    try {
+      settypestatus(msg);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  socket.on(`func${con}`, async(msg) => {
+    try {
+      if(msg.refresh===true){
+        await getter();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  return ()=>{
+    console.log('chala?')
+    socket.off(`message${con}${fri}`);
+  }
+}, [msges])
 
   const adder = async () => {
     setmetyping(false);
@@ -66,29 +123,33 @@ const ChatScreen = () => {
       today.getSeconds() +
       ":" +
       ms;
-    axios
-      .post(
-        `http://localhost:5000/chat/addchat/${conversation_id.slice(1)}`,
-        {
-          sender: header,
-          text: msgtext,
-          time: time,
-        },
-        {
-          headers: {
-            "auth-token": context.jwt_token,
-          },
-        },
-      )
-      .then((res) => {
-        getter();
-        setmsgtext("");
-      })
-      .catch((err) => {
-        alert(err);
-        navigate("/");
+    try {
+      await socket.emit("sendMessage", {
+        sender: header,
+        text: msgtext,
+        time: time,
+        conid: conversation_id.slice(1),
       });
+      const obj = { sender: header, text: msgtext, time: time };
+      setmsges((prevMsges) => [...prevMsges, obj]);
+      
+      socket.emit('removetyping',{
+        writer:header,
+        conid:conversation_id.slice(1)
+      });
+      setmsgtext("");
+      setmetyping(false);
+    } catch (error) {
+      console.log(error);
+      navigate("/");
+    }
   };
+
+
+
+
+
+
   const Textchanger = async (element, flag) => {
     if (flag) {
       element.text = modal;
@@ -107,12 +168,25 @@ const ChatScreen = () => {
       );
       setmodal();
       setelemental();
+      await getter();
+      socket.emit( 'func',{
+        conid:conversation_id.slice(1)
+      });
       alert("Changes Done");
     } catch (error) {
       alert("Some Error occured please try again later.");
     }
   };
+
+
+
+
   document.body.style.backgroundColor = "#91C8E4";
+
+
+
+
+
   return (
     <div>
       <center>
@@ -157,23 +231,24 @@ const ChatScreen = () => {
                       : { justifyContent: "left", display: "flex" }
                   }
                 >
-                  <div
-                    className="msg"
-                    style={{
-                      border: "1px solid blue",
-                      display: "flex",
-                      borderRadius: 10,
-                      marginTop: "0.5%",
-                      padding: 5,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <p>{element.text}</p>
-                    <small style={{ marginTop: "30%", left: "30%" }}>
-                      {element.time.slice(0, -3)}
-                    </small>
-                  </div>
+                <div
+  className="msg"
+  style={{
+    border: "1px solid blue",
+    display: "flex",
+    flexDirection: "column",  // Changed to column to break into lines
+    borderRadius: 10,
+    marginTop: "0.5%",
+    padding: 5,
+    justifyContent: "center",
+    alignItems: "center",
+  }}
+>
+  <p style={{ wordWrap: "break-word" }}>{element.text}</p>
+  <small style={{ marginTop: "5%", alignSelf: "flex-end" }}>
+    {element.time.slice(0, -3)}
+  </small>
+</div>
                 </div>
               );
             })
@@ -205,20 +280,17 @@ const ChatScreen = () => {
               padding: 5,
             }}
             value={msgtext}
+            onKeyDown={async(e)=>{
+              if (e.key === "Enter" ) {
+                e.preventDefault();
+                await adder();
+              }
+            }}
             onChange={async (event) => {
               try {
                 setmsgtext(event.target.value);
                 if (!metyping) {
-                  await axios.get(
-                    `http://localhost:5000/chat/addtyping/${conversation_id.slice(
-                      1,
-                    )}`,
-                    {
-                      headers: {
-                        "auth-token": context.jwt_token,
-                      },
-                    },
-                  );
+                  socket.emit('typing',{writer:header,conid:conversation_id.slice(1)});
                   setmetyping(true);
                 }
               } catch (error) {
@@ -239,6 +311,7 @@ const ChatScreen = () => {
             <i className="fa-solid fa-paper-plane"></i>
           </button>
         </div>
+
       </center>
       <div
         className="modal fade"
