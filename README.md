@@ -29,7 +29,7 @@ Before you begin, ensure you have the following requirements:
 
 - **Real-time Messaging:**
 
-  - Utilizes pooling for seamless real-time message fetching and sending.
+  - Utilizes WebRTC for seamless real-time message fetching and sending.
   - Users can edit and delete their sent messages.
 
 - **Online and Typing Status:**
