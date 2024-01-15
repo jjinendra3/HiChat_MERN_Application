@@ -16,7 +16,7 @@ Before you begin, ensure you have the following requirements:
 
 1. **Download and Setup:**
    - Open the terminal and Run ‘npm run installer’
-   - Run `npm run starter` to start the client and server.
+   - Run `npm run start` to start the client and server.
    - Open another terminal and Run `cd frontend`.
    - Run `npm run start` (press y if it asks to open another port) to start the second client.
    - Two browsers will open, simulating two different users.
